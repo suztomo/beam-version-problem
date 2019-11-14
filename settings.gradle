@@ -18,5 +18,4 @@
 
 rootProject.name = "beam"
 
-include ":release"
 include ":sdks:java:io:google-cloud-platform"
