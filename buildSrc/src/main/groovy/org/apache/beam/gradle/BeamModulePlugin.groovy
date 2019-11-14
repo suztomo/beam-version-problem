@@ -220,17 +220,6 @@ class BeamModulePlugin implements Plugin<Project> {
       ],
     ]
 
-    /** ***********************************************************************************************/
-
-    // Returns a string representing the relocated path to be used with the shadow plugin when
-    // given a suffix such as "com.google.common".
-    project.ext.getJavaRelocatedPath = { String suffix ->
-      return ("org.apache.beam.repackaged."
-              + project.name.replace("-", "_")
-              + "."
-              + suffix)
-    }
-
     project.ext.repositories = {
       maven {
         name "testPublicationLocal"
@@ -786,20 +775,6 @@ class BeamModulePlugin implements Plugin<Project> {
             sign project.publishing.publications
           }
         }
-      }
-
-      // Ban these dependencies from all configurations
-      project.configurations.all {
-        // guava-jdk5 brings in classes which conflict with guava
-        exclude group: "com.google.guava", module: "guava-jdk5"
-        // Ban the usage of the JDK tools as a library as this is system dependent
-        exclude group: "jdk.tools", module: "jdk.tools"
-        // protobuf-lite duplicates classes which conflict with protobuf-java
-        exclude group: "com.google.protobuf", module: "protobuf-lite"
-        // Exclude these test dependencies because they bundle other common
-        // test libraries classes causing version conflicts. Users should rely
-        // on using the yyy-core package instead of the yyy-all package.
-        exclude group: "org.hamcrest", module: "hamcrest-all"
       }
 
       // Force usage of the libraries defined within our common set found in the root
