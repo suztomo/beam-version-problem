@@ -353,38 +353,6 @@ class BeamModulePlugin implements Plugin<Project> {
     //   testCompile library.java.junit
     // }
 
-    // These versions are defined here because they represent
-    // a dependency version which should match across multiple
-    // Maven artifacts.
-    def apex_core_version = "3.7.0"
-    def apex_malhar_version = "3.4.0"
-    def aws_java_sdk_version = "1.11.519"
-    def aws_java_sdk2_version = "2.5.71"
-    def cassandra_driver_version = "3.6.0"
-    def generated_grpc_beta_version = "0.44.0"
-    def generated_grpc_ga_version = "1.43.0"
-    def generated_grpc_dc_beta_version = "0.27.0-alpha"
-    def google_auth_version = "0.12.0"
-    def google_clients_version = "1.28.0"
-    def google_cloud_bigdataoss_version = "1.9.16"
-    def google_cloud_core_version = "1.61.0"
-    def google_cloud_spanner_version = "1.6.0"
-    def grpc_version = "1.17.1"
-    def guava_version = "20.0"
-    def hadoop_version = "2.7.3"
-    def hamcrest_version = "2.1"
-    def jackson_version = "2.9.10"
-    def jaxb_api_version = "2.2.12"
-    def kafka_version = "1.0.0"
-    def nemo_version = "0.1"
-    def netty_version = "4.1.30.Final"
-    def postgres_version = "42.2.2"
-    def powermock_version = "2.0.2"
-    def proto_google_common_protos_version = "1.12.0"
-    def protobuf_version = "3.6.0"
-    def quickcheck_version = "0.8"
-    def spark_version = "2.4.4"
-
     // A map of maps containing common libraries used per language. To use:
     // dependencies {
     //   compile library.java.slf4j_api
@@ -737,103 +705,6 @@ class BeamModulePlugin implements Plugin<Project> {
           }
           testCompile.extendsFrom shadowTest
         }
-      }
-
-      project.jar {
-        setAutomaticModuleNameHeader(configuration, project)
-
-        zip64 true
-        into("META-INF/") {
-          from "${project.rootProject.projectDir}/LICENSE"
-          from "${project.rootProject.projectDir}/NOTICE"
-        }
-      }
-
-      // Always configure the shadowJar classifier and merge service files.
-      if (configuration.shadowClosure) {
-        // Only set the classifer on the unshaded classes if we are shading.
-        project.jar { classifier = "unshaded" }
-
-        project.shadowJar({
-          classifier = null
-          mergeServiceFiles()
-          zip64 true
-          into("META-INF/") {
-            from "${project.rootProject.projectDir}/LICENSE"
-            from "${project.rootProject.projectDir}/NOTICE"
-          }
-        } << configuration.shadowClosure)
-
-        // Always configure the shadowTestJar classifier and merge service files.
-        project.task('shadowTestJar', type: ShadowJar, {
-          group = "Shadow"
-          description = "Create a combined JAR of project and test dependencies"
-          classifier = "tests"
-          from project.sourceSets.test.output
-          configurations = [
-            project.configurations.testRuntime
-          ]
-          zip64 true
-          exclude "META-INF/INDEX.LIST"
-          exclude "META-INF/*.SF"
-          exclude "META-INF/*.DSA"
-          exclude "META-INF/*.RSA"
-        } << configuration.shadowClosure)
-
-        // Ensure that shaded jar and test-jar are part of the their own configuration artifact sets
-        project.artifacts.shadow project.shadowJar
-        project.artifacts.shadowTest project.shadowTestJar
-
-        if (configuration.testShadowJar) {
-          // Use a configuration and dependency set which represents the execution classpath using shaded artifacts for tests.
-          project.configurations { shadowTestRuntimeClasspath }
-
-          project.dependencies {
-            shadowTestRuntimeClasspath it.project(path: project.path, configuration: "shadowTest")
-            shadowTestRuntimeClasspath it.project(path: project.path, configuration: "provided")
-          }
-
-          project.test { classpath = project.configurations.shadowTestRuntimeClasspath }
-        }
-
-        if (configuration.validateShadowJar) {
-          project.task('validateShadedJarDoesntLeakNonProjectClasses', dependsOn: 'shadowJar') {
-            ext.outFile = project.file("${project.reportsDir}/${name}.out")
-            inputs.files project.configurations.shadow.artifacts.files
-            outputs.files outFile
-            doLast {
-              project.configurations.shadow.artifacts.files.each {
-                FileTree exposedClasses = project.zipTree(it).matching {
-                  include "**/*.class"
-                  // BEAM-5919: Exclude paths for Java 9 multi-release jars.
-                  exclude "META-INF/versions/*/module-info.class"
-                  configuration.shadowJarValidationExcludes.each {
-                    exclude "$it"
-                    exclude "META-INF/versions/*/$it"
-                  }
-                }
-                outFile.text = exposedClasses.files
-                if (exposedClasses.files) {
-                  throw new GradleException("$it exposed classes outside of ${configuration.shadowJarValidationExcludes}: ${exposedClasses.files}")
-                }
-              }
-            }
-          }
-          project.tasks.check.dependsOn project.tasks.validateShadedJarDoesntLeakNonProjectClasses
-        }
-      } else {
-        project.task("testJar", type: Jar, {
-          group = "Jar"
-          description = "Create a JAR of test classes"
-          classifier = "tests"
-          from project.sourceSets.test.output
-          zip64 true
-          exclude "META-INF/INDEX.LIST"
-          exclude "META-INF/*.SF"
-          exclude "META-INF/*.DSA"
-          exclude "META-INF/*.RSA"
-        })
-        project.artifacts.testRuntime project.testJar
       }
 
       project.ext.includeInJavaBom = configuration.publish
@@ -1821,16 +1692,6 @@ class BeamModulePlugin implements Plugin<Project> {
         addPortableWordCountTask(false, "FlinkRunner")
         addPortableWordCountTask(true, "FlinkRunner")
         addPortableWordCountTask(false, "SparkRunner")
-      }
-    }
-  }
-
-  private void setAutomaticModuleNameHeader(JavaNatureConfiguration configuration, Project project) {
-    if (configuration.publish && !configuration.automaticModuleName) {
-      throw new GradleException("Expected automaticModuleName to be set for the module that is published to maven repository.")
-    } else if (configuration.automaticModuleName) {
-      project.jar.manifest {
-        attributes 'Automatic-Module-Name': configuration.automaticModuleName
       }
     }
   }
