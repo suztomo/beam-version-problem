@@ -55,28 +55,5 @@ class Repositories {
       // Apache release snapshots
       maven { url "https://repository.apache.org/content/repositories/releases" }
     }
-
-    // Apply a plugin which provides the 'updateOfflineRepository' task that creates an offline
-    // repository. This offline repository satisfies all Gradle build dependencies and Java
-    // project dependencies. The offline repository is placed within $rootDir/offline-repo
-    // but can be overridden by specifying '-PofflineRepositoryRoot=/path/to/repo'.
-    // Note that parallel build must be disabled when executing 'updateOfflineRepository'
-    // by specifying '--no-parallel', see
-    // https://github.com/mdietrichstein/gradle-offline-dependencies-plugin/issues/3
-    project.apply plugin: "io.pry.gradle.offline_dependencies"
-    project.offlineDependencies {
-      repositories {
-        mavenLocal()
-        mavenCentral()
-        jcenter()
-        maven { url "https://plugins.gradle.org/m2/" }
-        maven { url "http://repo.spring.io/plugins-release" }
-        maven { url project.offlineRepositoryRoot }
-      }
-      includeSources = false
-      includeJavadocs = false
-      includeIvyXmls = false
-    }
   }
 }
-
