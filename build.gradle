@@ -17,18 +17,10 @@
  */
 
 plugins {
-  id 'base'
   // This plugin provides a task to determine which dependencies have updates.
   // Additionally, the plugin checks for updates to Gradle itself.
   //
   // See https://github.com/ben-manes/gradle-versions-plugin for further details.
   id 'com.github.ben-manes.versions' version '0.20.0'
-  id 'org.apache.beam.module'
   id "org.sonarqube" version "2.7"
 }
-
-task runBeamDependencyCheck() {
-  dependsOn ":dependencyUpdates"
-  dependsOn ":sdks:python:dependencyUpdates"
-}
-
