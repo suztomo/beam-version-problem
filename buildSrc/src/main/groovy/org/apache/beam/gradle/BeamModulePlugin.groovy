@@ -21,28 +21,15 @@ package org.apache.beam.gradle
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
-/**
- * This plugin adds methods to configure a module with Beam's defaults, called "natures".
- *
- * <p>The natures available:
- *
- * <ul>
- *   <li>Java   - Configures plugins commonly found in Java projects
- *   <li>Go     - Configures plugins commonly found in Go projects
- *   <li>Docker - Configures plugins commonly used to build Docker containers
- *   <li>Grpc   - Configures plugins commonly used to generate source from protos
- *   <li>Avro   - Configures plugins commonly used to generate source from Avro specifications
- * </ul>
- *
- * <p>For example, see applyJavaNature.
- */
 class BeamModulePlugin implements Plugin<Project> {
   void apply(Project project) {
     project.ext.mavenGroupId = 'org.apache.beam'
 
     project.version = '2.18.0'
-    // Register all Beam repositories and configuration tweaks
-    Repositories.register(project)
+
+    project.repositories {
+      mavenCentral()
+    }
 
     project.ext.library = [
       java : [
