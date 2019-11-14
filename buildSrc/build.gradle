@@ -84,13 +84,5 @@ gradlePlugin {
       id = 'org.apache.beam.module'
       implementationClass = 'org.apache.beam.gradle.BeamModulePlugin'
     }
-    vendorJava {
-      id = 'org.apache.beam.vendor-java'
-      implementationClass = 'org.apache.beam.gradle.VendorJavaPlugin'
-    }
-    beamJenkins {
-      id = 'org.apache.beam.jenkins'
-      implementationClass = 'org.apache.beam.gradle.BeamJenkinsPlugin'
-    }
   }
 }
