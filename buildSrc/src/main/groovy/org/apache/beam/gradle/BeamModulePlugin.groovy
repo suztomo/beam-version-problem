@@ -32,7 +32,9 @@ class BeamModulePlugin implements Plugin<Project> {
     }
 
     project.ext.library = [
-      java : [:],
+      java : [
+        google_cloud_bigtable_client_core           : "com.google.cloud.bigtable:bigtable-client-core:1.8.0",
+      ],
     ]
 
     project.ext.applyJavaNature = {
